@@ -1,3 +1,4 @@
+import bcript from "bcryptjs";
 import type { FastifyInstance } from "fastify";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
 import z from "zod";
@@ -27,11 +28,20 @@ export const createUser = async (app: FastifyInstance) => {
    },
    async (request, reply) => {
       const { name, email, password } = request.body;
+      const userExists = await prisma.user.findUnique({
+        where: {
+          email,
+        },
+      });
+      if (userExists) {
+        return reply.code(400).send({ message: 'User already exists' });
+      }
+
       const user = await prisma.user.create({
         data: {
           name,
           email,
-          password,
+          password: bcript.hashSync(password, 8),
         },
       });
       reply.code(201).send(user);
