@@ -5,6 +5,7 @@ import { fastify } from "fastify";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
 import { jsonSchemaTransform, serializerCompiler, validatorCompiler } from "fastify-type-provider-zod";
 import { createUser } from "./routes/create-user";
+import { findAllUsers } from "./routes/find-all-user";
 
 const app = fastify({ logger: true }).withTypeProvider<ZodTypeProvider>();
 app.setValidatorCompiler(validatorCompiler);
@@ -27,6 +28,7 @@ app.register(ScalarApiReference, {
   routePrefix: "/docs",
 })
 app.register(createUser);
+app.register(findAllUsers);
 
 app.listen({ port: 3333 }, (err, address) => {
 	if (err) {

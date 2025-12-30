@@ -1,0 +1,102 @@
+
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
+enum MemberRole {
+  ADMIN
+  MEMBER
+}
+
+model User {
+  id            String            @id @default(uuid())
+  name          String
+  email         String            @unique
+  password      String
+  groups        Group[]           // Grupos que ele criou
+  memberships   GroupMember[]     // Grupos que ele faz parte
+  sentInvites   GroupInvitation[] @relation("SentInvites")
+  receivedInvites GroupInvitation[] @relation("ReceivedInvites")
+  ideas         Idea[]
+  comments      Comment[]
+  likes         Like[]
+}
+
+model Group {
+  id          String            @id @default(uuid())
+  name        String
+  description String?
+  adminId     String
+  admin       User              @relation(fields: [adminId], references: [id])
+  members     GroupMember[]
+  invitations GroupInvitation[]
+  ideas       Idea[]
+  createdAt   DateTime          @default(now())
+}
+
+model GroupMember {
+  id      String     @id @default(uuid())
+  role    MemberRole @default(MEMBER)
+  userId  String
+  groupId String
+  user    User       @relation(fields: [userId], references: [id])
+  group   Group      @relation(fields: [groupId], references: [id])
+
+  @@unique([userId, groupId])
+}
+
+model GroupInvitation {
+  id         String           @id @default(uuid())
+  status     InvitationStatus @default(PENDING)
+  groupId    String
+  senderId   String
+  receiverId String
+  group      Group            @relation(fields: [groupId], references: [id])
+  sender     User             @relation("SentInvites", fields: [senderId], references: [id])
+  receiver   User             @relation("ReceivedInvites", fields: [receiverId], references: [id])
+}
+
+model Idea {
+  id          String    @id @default(uuid())
+  title       String
+  description String    @db.Text
+  authorId    String
+  groupId     String
+  author      User      @relation(fields: [authorId], references: [id])
+  group       Group     @relation(fields: [groupId], references: [id])
+  comments    Comment[]
+  likes       Like[]
+  createdAt   DateTime  @default(now())
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  content   String   @db.Text
+  authorId  String
+  ideaId    String
+  author    User     @relation(fields: [authorId], references: [id])
+  idea      Idea     @relation(fields: [ideaId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model Like {
+  userId String
+  ideaId String
+  user   User   @relation(fields: [userId], references: [id])
+  idea   Idea   @relation(fields: [ideaId], references: [id])
+
+  @@id([userId, ideaId])
+}
