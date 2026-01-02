@@ -31,15 +31,17 @@ app.register(fastifySwagger, {
 app.register(ScalarApiReference, {
   routePrefix: "/docs",
 })
-app.register(createUser);
-app.register(findAllUsers);
-app.register(loginUser);
-//app.register(createGroup);
-
 app.register(jwt, {
   secret: 'my-jwt-secret',
 })
-app.register(decorateAuth);
+app.addHook('preHandler', (_req, _reply, next) => {
+  return next()
+})
+
+app.register(createUser);
+app.register(findAllUsers);
+app.register(loginUser);
+app.register(createGroup);
 
 app.listen({ port: 3333 }, (err, address) => {
 	if (err) {

@@ -1,12 +1,12 @@
 import type { FastifyInstance } from "fastify";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
 import z from "zod";
+import { auth } from "@/middlewares/auth";
 
 export const createGroup = async (app: FastifyInstance) => {
-	app.withTypeProvider<ZodTypeProvider>().post(
+	app.withTypeProvider<ZodTypeProvider>().register(auth).post(
 		"/groups",
 		{
-			onRequest: [app.authenticate],
 			schema: {
             summary: "Create a new group(authenticated)",
             body: z.object({
@@ -20,6 +20,6 @@ export const createGroup = async (app: FastifyInstance) => {
 		},
 		async (request, reply) => {
          const { name, description } = request.body;
-         console.log(`Creating group: ${name} - ${description}`);
+         request.log.info(`Creating group: ${name} - ${description}`);
       });
 };
