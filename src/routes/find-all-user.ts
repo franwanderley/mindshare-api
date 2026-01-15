@@ -18,9 +18,6 @@ export const findAllUsers = async (app: FastifyInstance) => {
 							password: z.string().min(8),
 						}),
 					),
-					400: z.object({
-						message: z.string(),
-					}),
 				},
 			},
 		},

@@ -7,9 +7,10 @@ import type { ZodTypeProvider } from "fastify-type-provider-zod";
 import { jsonSchemaTransform, serializerCompiler, validatorCompiler } from "fastify-type-provider-zod";
 import { createUser } from "./routes/create-user";
 import { findAllUsers } from "./routes/find-all-user";
-import { decorateAuth } from "./decorators/auth";
 import { createGroup } from "./routes/group/create-group";
 import { loginUser } from "./routes/auth/login";
+import { inviteUser } from "./routes/invite/invite-user";
+import { findInviteByUser } from "./routes/invite/find-invite-by-user";
 
 const app = fastify({ logger: true }).withTypeProvider<ZodTypeProvider>();
 app.setValidatorCompiler(validatorCompiler);
@@ -42,6 +43,8 @@ app.register(createUser);
 app.register(findAllUsers);
 app.register(loginUser);
 app.register(createGroup);
+app.register(inviteUser);
+app.register(findInviteByUser);
 
 app.listen({ port: 3333 }, (err, address) => {
 	if (err) {
