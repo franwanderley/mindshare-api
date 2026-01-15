@@ -11,6 +11,7 @@ import { createGroup } from "./routes/group/create-group";
 import { loginUser } from "./routes/auth/login";
 import { inviteUser } from "./routes/invite/invite-user";
 import { findInviteByUser } from "./routes/invite/find-invite-by-user";
+import { replyInvite } from "./routes/invite/reply-invite";
 
 const app = fastify({ logger: true }).withTypeProvider<ZodTypeProvider>();
 app.setValidatorCompiler(validatorCompiler);
@@ -45,6 +46,7 @@ app.register(loginUser);
 app.register(createGroup);
 app.register(inviteUser);
 app.register(findInviteByUser);
+app.register(replyInvite);
 
 app.listen({ port: 3333 }, (err, address) => {
 	if (err) {

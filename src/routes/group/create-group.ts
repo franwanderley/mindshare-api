@@ -51,6 +51,13 @@ export const createGroup = async (app: FastifyInstance) => {
 						adminId,
 					},
 				});
+        await prisma.groupMember.create({
+          data: {
+            groupId: group.id,
+            userId: adminId,
+            role: "ADMIN",
+          },
+        })
 				return reply.code(201).send(group);
 			},
 		);
