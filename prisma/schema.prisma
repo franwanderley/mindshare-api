@@ -53,7 +53,7 @@ model GroupMember {
   userId  String
   groupId String
   user    User       @relation(fields: [userId], references: [id])
-  group   Group      @relation(fields: [groupId], references: [id])
+  group   Group      @relation(fields: [groupId], references: [id], onDelete: Cascade)
 
   @@unique([userId, groupId])
 }
@@ -64,7 +64,7 @@ model GroupInvitation {
   groupId    String
   senderId   String
   receiverId String
-  group      Group            @relation(fields: [groupId], references: [id])
+  group      Group            @relation(fields: [groupId], references: [id], onDelete: Cascade)
   sender     User             @relation("SentInvites", fields: [senderId], references: [id])
   receiver   User             @relation("ReceivedInvites", fields: [receiverId], references: [id])
 }
@@ -76,7 +76,7 @@ model Idea {
   authorId    String
   groupId     String
   author      User      @relation(fields: [authorId], references: [id])
-  group       Group     @relation(fields: [groupId], references: [id])
+  group       Group     @relation(fields: [groupId], references: [id], onDelete: Cascade)
   comments    Comment[]
   likes       Like[]
   createdAt   DateTime  @default(now())
@@ -88,7 +88,7 @@ model Comment {
   authorId  String
   ideaId    String
   author    User     @relation(fields: [authorId], references: [id])
-  idea      Idea     @relation(fields: [ideaId], references: [id])
+  idea      Idea     @relation(fields: [ideaId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
 }
 
@@ -96,7 +96,7 @@ model Like {
   userId String
   ideaId String
   user   User   @relation(fields: [userId], references: [id])
-  idea   Idea   @relation(fields: [ideaId], references: [id])
+  idea   Idea   @relation(fields: [ideaId], references: [id], onDelete: Cascade)
 
   @@id([userId, ideaId])
 }
