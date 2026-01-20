@@ -22,7 +22,7 @@ export const deleteGroup = async (app: FastifyInstance) => {
 				},
 			},
 			async (request, reply) => {
-            const { sub } = request.user as { sub: string };
+            const { sub } = z.object({ sub: z.string() }).parse(request.user);
             const group = await prisma.group.findUnique({
                where: {
                   id: request.params.id,
