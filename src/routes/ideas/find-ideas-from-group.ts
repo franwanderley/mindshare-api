@@ -12,7 +12,7 @@ export const findIdeasFromGroup = async (app: FastifyInstance) => {
       "/ideas/:groupId",
       {
         schema: {
-          summary: "Get all ideas from a group(authenticate)",
+          summary: "find all ideas from a group(authenticate)",
           params: z.object({
             groupId: z.string(),
           }),
