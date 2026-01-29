@@ -4,18 +4,18 @@ import z from "zod";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/middlewares/auth";
 
-export const deleteIdeas = async (app: FastifyInstance) => {
+export const removeMemberFromGroup = async (app: FastifyInstance) => {
   app
     .withTypeProvider<ZodTypeProvider>()
     .register(auth)
-    .delete(
-      "/ideas/:id",
+    .patch(
+      "/groups/:groupId/members/:memberId",
       {
         schema: {
-          summary:
-            "Delete a idea if you are the author or group admin(authenticated)",
+          summary: "Remove a member from a group(authenticated)",
           params: z.object({
-            id: z.string(),
+            groupId: z.string(),
+            memberId: z.string(),
           }),
           headers: z.object({
             authorization: z.string(),
@@ -23,29 +23,30 @@ export const deleteIdeas = async (app: FastifyInstance) => {
         },
       },
       async (request, reply) => {
-        const { id } = request.params;
+        const { groupId, memberId } = request.params;
         const { sub } = z.object({ sub: z.string() }).parse(request.user);
 
-        const idea = await prisma.idea.findUnique({
+        const group = await prisma.group.findUnique({
           where: {
-            id,
+            id: groupId,
           },
           include: {
-            group: true,
+            members: true,
           },
         });
-        if (!idea) {
-          return reply.status(400).send({ error: "Idea not found" });
-        }
-        if (idea.authorId !== sub && idea.group.adminId !== sub) {
-          return reply
-            .status(400)
-            .send({ error: "You are not the author or group admin" });
+        if (!group) {
+          return reply.status(400).send({ error: "Group not found" });
         }
 
-        await prisma.idea.delete({
+        if (group.adminId !== sub) {
+          return reply
+            .status(400)
+            .send({ error: "You are not the group admin" });
+        }
+
+        await prisma.groupMember.delete({
           where: {
-            id,
+            id: memberId,
           },
         });
         return reply.status(204).send();

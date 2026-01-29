@@ -4,18 +4,20 @@ import z from "zod";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/middlewares/auth";
 
-export const deleteIdeas = async (app: FastifyInstance) => {
+export const commentIdeas = async (app: FastifyInstance) => {
   app
     .withTypeProvider<ZodTypeProvider>()
     .register(auth)
-    .delete(
-      "/ideas/:id",
+    .post(
+      "/ideas/:id/comment",
       {
         schema: {
-          summary:
-            "Delete a idea if you are the author or group admin(authenticated)",
+          summary: "Comment on an idea(authenticated)",
           params: z.object({
             id: z.string(),
+          }),
+          body: z.object({
+            content: z.string(),
           }),
           headers: z.object({
             authorization: z.string(),
@@ -24,31 +26,44 @@ export const deleteIdeas = async (app: FastifyInstance) => {
       },
       async (request, reply) => {
         const { id } = request.params;
+        const { content } = request.body;
         const { sub } = z.object({ sub: z.string() }).parse(request.user);
 
         const idea = await prisma.idea.findUnique({
           where: {
             id,
           },
-          include: {
-            group: true,
-          },
         });
         if (!idea) {
           return reply.status(400).send({ error: "Idea not found" });
         }
-        if (idea.authorId !== sub && idea.group.adminId !== sub) {
-          return reply
-            .status(400)
-            .send({ error: "You are not the author or group admin" });
-        }
 
-        await prisma.idea.delete({
+        const group = await prisma.group.findUnique({
           where: {
-            id,
+            id: idea.groupId,
+          },
+          include: {
+            members: true,
           },
         });
-        return reply.status(204).send();
+        if (!group) {
+          return reply.status(400).send({ error: "Group not found" });
+        }
+
+        if (group.members.some((member) => member.id === sub)) {
+          return reply
+            .status(400)
+            .send({ error: "User is not a member of the group" });
+        }
+
+        const comment = await prisma.comment.create({
+          data: {
+            authorId: sub,
+            ideaId: id,
+            content,
+          },
+        });
+        return reply.status(201).send(comment);
       },
     );
 };

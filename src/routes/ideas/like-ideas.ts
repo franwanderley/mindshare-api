@@ -4,16 +4,15 @@ import z from "zod";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/middlewares/auth";
 
-export const deleteIdeas = async (app: FastifyInstance) => {
+export const likeIdeas = async (app: FastifyInstance) => {
   app
     .withTypeProvider<ZodTypeProvider>()
     .register(auth)
-    .delete(
-      "/ideas/:id",
+    .post(
+      "/ideas/:id/like",
       {
         schema: {
-          summary:
-            "Delete a idea if you are the author or group admin(authenticated)",
+          summary: "Like an idea(authenticated)",
           params: z.object({
             id: z.string(),
           }),
@@ -30,22 +29,33 @@ export const deleteIdeas = async (app: FastifyInstance) => {
           where: {
             id,
           },
-          include: {
-            group: true,
-          },
         });
         if (!idea) {
           return reply.status(400).send({ error: "Idea not found" });
         }
-        if (idea.authorId !== sub && idea.group.adminId !== sub) {
-          return reply
-            .status(400)
-            .send({ error: "You are not the author or group admin" });
+
+        const group = await prisma.group.findUnique({
+          where: {
+            id: idea.groupId,
+          },
+          include: {
+            members: true,
+          },
+        });
+        if (!group) {
+          return reply.status(400).send({ error: "Group not found" });
         }
 
-        await prisma.idea.delete({
-          where: {
-            id,
+        if (group.members.some((member) => member.id === sub)) {
+          return reply
+            .status(400)
+            .send({ error: "User is not a member of the group" });
+        }
+
+        await prisma.like.create({
+          data: {
+            userId: sub,
+            ideaId: id,
           },
         });
         return reply.status(204).send();
