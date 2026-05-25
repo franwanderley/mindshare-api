@@ -1,3 +1,4 @@
+import { cp } from "node:fs";
 import fastifyCors from "@fastify/cors";
 import jwt from "@fastify/jwt";
 import fastifySwagger from "@fastify/swagger";
@@ -5,15 +6,17 @@ import ScalarApiReference from "@scalar/fastify-api-reference";
 import { fastify } from "fastify";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
 import {
-  jsonSchemaTransform,
-  serializerCompiler,
-  validatorCompiler,
+	jsonSchemaTransform,
+	serializerCompiler,
+	validatorCompiler,
 } from "fastify-type-provider-zod";
 import { loginUser } from "./routes/auth/login";
 import { createGroup } from "./routes/group/create-group";
 import { deleteGroup } from "./routes/group/delete-group";
 import { findAllGroup } from "./routes/group/find-all-group";
+import { findByIdGroup } from "./routes/group/find-by-id-group";
 import { removeMemberFromGroup } from "./routes/group/remove-member-from-group";
+import { commentIdeas } from "./routes/ideas/comment-ideas";
 import { createIdeas } from "./routes/ideas/create-ideas";
 import { deleteIdeas } from "./routes/ideas/delete-ideas";
 import { findIdeasFromGroup } from "./routes/ideas/find-ideas-from-group";
@@ -29,27 +32,27 @@ const app = fastify({ logger: true }).withTypeProvider<ZodTypeProvider>();
 app.setValidatorCompiler(validatorCompiler);
 app.setSerializerCompiler(serializerCompiler);
 app.register(fastifyCors, {
-  origin: "*",
-  methods: ["GET", "POST", "PUT", "DELETE"],
+	origin: "*",
+	methods: ["GET", "POST", "PUT", "DELETE"],
 });
 app.register(fastifySwagger, {
-  openapi: {
-    info: {
-      title: "MindShare API",
-      description: "MindShare API",
-      version: "1.0.0",
-    },
-  },
-  transform: jsonSchemaTransform,
+	openapi: {
+		info: {
+			title: "MindShare API",
+			description: "MindShare API",
+			version: "1.0.0",
+		},
+	},
+	transform: jsonSchemaTransform,
 });
 app.register(ScalarApiReference, {
-  routePrefix: "/docs",
+	routePrefix: "/docs",
 });
 app.register(jwt, {
-  secret: "my-jwt-secret",
+	secret: "my-jwt-secret",
 });
 app.addHook("preHandler", (_req, _reply, next) => {
-  return next();
+	return next();
 });
 
 app.register(findIdeasFromGroup);
@@ -67,13 +70,15 @@ app.register(replyInvite);
 app.register(removeMemberFromGroup);
 app.register(deleteGroup);
 app.register(deleteIdeas);
+app.register(commentIdeas);
+app.register(findByIdGroup);
 
 app.listen({ port: 3333 }, (err, address) => {
-  if (err) {
-    app.log.error(err);
-    process.exit(1);
-  }
-  console.log(`Server listening on ${address}`);
+	if (err) {
+		app.log.error(err);
+		process.exit(1);
+	}
+	console.log(`Server listening on ${address}`);
 });
 
 export default app;

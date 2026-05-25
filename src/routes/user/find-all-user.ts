@@ -9,6 +9,9 @@ export const findAllUsers = async (app: FastifyInstance) => {
 		{
 			schema: {
 				summary: "Find all users",
+				querystring: z.object({
+					email: z.optional(z.string()),
+				}),
 				response: {
 					200: z.array(
 						z.object({
@@ -21,8 +24,11 @@ export const findAllUsers = async (app: FastifyInstance) => {
 				},
 			},
 		},
-		async (_, reply) => {
-			const users = await prisma.user.findMany();
+		async (request, reply) => {
+			const { email } = request.query;
+			const users = await prisma.user.findMany({
+				where: email ? { email } : undefined,
+			});
 			reply.code(200).send(users);
 		},
 	);

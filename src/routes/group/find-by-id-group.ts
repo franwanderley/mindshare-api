@@ -4,24 +4,23 @@ import z from "zod";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/middlewares/auth";
 
-export const findAllGroup = async (app: FastifyInstance) => {
+export const findByIdGroup = async (app: FastifyInstance) => {
   app
     .withTypeProvider<ZodTypeProvider>()
     .register(auth)
     .get(
-      "/groups",
+      "/groups/:id",
       {
         schema: {
-          summary: "Find all groups(authenticated)",
+          summary: "Find group by ID(authenticated)",
           headers: z.object({
             authorization: z.string(),
           }),
-          querystring: z.object({
-            userId: z.optional(z.uuid()),
+          params: z.object({
+            id: z.string(),
           }),
           response: {
-            200: z.array(
-              z.object({
+            200: z.object({
                 id: z.uuid(),
                 name: z.string(),
                 description: z.string().nullable(),
@@ -36,25 +35,25 @@ export const findAllGroup = async (app: FastifyInstance) => {
                   }),
                 ),
               }),
-            ),
+            400: z.object({
+              error: z.string(),
+            }),
           },
         },
       },
       async (request, reply) => {
-        const { userId } = request.query;
-        const groups = await prisma.group.findMany({
+        const group = await prisma.group.findUnique({
           include: {
             members: true,
           },
-          where: userId ? {
-            members: {
-              some: {
-                userId,
-              },
-            },
-          } : undefined,
+          where: {
+            id: request.params.id
+          },
         });
-        return reply.status(200).send(groups);
+        if (!group) {
+          return reply.status(400).send({ error: "Group not found" });
+        }
+        return reply.status(200).send(group);
       },
     );
 };
