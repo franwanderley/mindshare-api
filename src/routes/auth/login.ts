@@ -15,6 +15,7 @@ export const loginUser = async (app: FastifyInstance) => {
          response: {
           200: z.object({
             token: z.string(),
+            name: z.string(),
             }),
           401: z.object({
             message: z.string(),
@@ -38,7 +39,7 @@ export const loginUser = async (app: FastifyInstance) => {
       const token = app.jwt.sign({
         sub: user.id,
       });
-      reply.code(200).send({ token });
+      reply.code(200).send({ token, name: user.name });
    });
 
 };

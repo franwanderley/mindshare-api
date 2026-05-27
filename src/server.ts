@@ -1,4 +1,3 @@
-import { cp } from "node:fs";
 import fastifyCors from "@fastify/cors";
 import jwt from "@fastify/jwt";
 import fastifySwagger from "@fastify/swagger";
