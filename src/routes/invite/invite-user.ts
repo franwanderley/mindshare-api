@@ -49,6 +49,16 @@ export const inviteUser = async (app: FastifyInstance) => {
             if (group.adminId !== senderId) {
                   return reply.code(400).send({ message: "Only group admin can send invites" });
             }
+				const inviteExists = await prisma.groupInvitation.findFirst({
+					where: {
+						groupId,
+						receiverId,
+						status: "PENDING",
+					},
+				});
+				if (inviteExists) {
+					return reply.code(400).send({ message: "Invite already exists" });
+				}
 				const invite = await prisma.groupInvitation.create({
                data: {
                   groupId,
