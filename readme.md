@@ -17,7 +17,7 @@ O projeto foi desenvolvido com as seguintes tecnologias e ferramentas:
 
 Abaixo está a documentação base dos endpoints disponíveis nesta API. Todas as requisições devem incluir o cabeçalho apropriado de `Content-Type: application/json` quando aplicável.
 
-### Autenticação e Usuários *(Exemplo - Ajuste para o seu projeto)*
+### Autenticação e Usuários
 
 | Método | Rota | Descrição | Requer Auth |
 |---|---|---|:---:|
