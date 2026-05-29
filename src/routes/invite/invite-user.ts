@@ -53,7 +53,9 @@ export const inviteUser = async (app: FastifyInstance) => {
 					where: {
 						groupId,
 						receiverId,
-						status: "PENDING",
+						status: {
+							in: ["PENDING", "ACCEPTED"],
+						},
 					},
 				});
 				if (inviteExists) {

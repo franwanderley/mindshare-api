@@ -32,7 +32,7 @@ app.setValidatorCompiler(validatorCompiler);
 app.setSerializerCompiler(serializerCompiler);
 app.register(fastifyCors, {
 	origin: "*",
-	methods: ["GET", "POST", "PUT", "DELETE"],
+	methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
 });
 app.register(fastifySwagger, {
 	openapi: {
