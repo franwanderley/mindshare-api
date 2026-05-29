@@ -5,7 +5,8 @@
 	"scripts": {
 		"dev": "tsx watch --env-file=.env src/server.ts",
 		"start": "node dist/server.js",
-		"lint": "npx @biomejs/biome format --write"
+		"lint": "npx @biomejs/biome format --write",
+		"build": "tsc"
 	},
 	"keywords": [],
 	"author": "",
